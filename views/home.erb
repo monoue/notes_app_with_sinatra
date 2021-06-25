@@ -1,0 +1,9 @@
+<h1>メモアプリ</h1>
+<button onclick="location.href='/new'">追加</button>
+<ul>
+  <% @notes.each do |note| %>
+    <li><a href="/notes/<%= note['id'] %>">
+      <%= Rack::Utils.escape_html(note['title']) %></a>
+    </li>
+  <% end %>
+</ul>
