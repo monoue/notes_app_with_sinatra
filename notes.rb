@@ -43,6 +43,11 @@ def add_note_to_json(params, id = SecureRandom.uuid)
   open(get_json_path, 'w') { |io| JSON.dump(json_data, io) }
 end
 
+not_found do
+  status 404
+  erb :not_found
+end
+
 post '/new' do
   add_note_to_json(params)
   redirect to ('/home')
