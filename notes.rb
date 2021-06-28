@@ -23,6 +23,7 @@ def get_target_note(id)
 end
 
 get '/home' do
+  @title = 'ホーム / My Notes'
   json_data = get_json_data
   @notes = json_data['notes']
   erb :home
@@ -55,11 +56,13 @@ end
 
 get '/notes/:id' do |id|
   @note = get_target_note(id)
+  @title = "メモ: #{@note['title']}"
   erb :note
 end
 
 get '/notes/:id/edit' do |id|
   @note = get_target_note(id)
+  @title = "変更: #{@note['title']}"
   erb :edit
 end
 
@@ -99,5 +102,6 @@ delete '/notes/:id' do |id|
 end
 
 get '/new' do
+  @title = '追加'
   erb :new
 end
