@@ -7,7 +7,7 @@
 <button onclick="location.href='/notes/<%= @note['id'] %>/edit'">変更</button>
 <p></p>
 
-<form action="/notes/<%= @note['id'] %>" method="get">
+<form action="/notes/<%= @note['id'] %>" method="post">
   <input type="hidden" name="_method" value="DELETE">
   <input type="submit" value="削除">
 </form>

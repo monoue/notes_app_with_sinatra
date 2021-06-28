@@ -1,0 +1,9 @@
+<h1>メモアプリ</h1>
+
+<form action="/notes/<%= @note['id'] %>/edit" method="post">
+  <input type="hidden" name="_method" value="PATCH">
+  <input type="text" name="title" value="<%= @note['title'] %>">
+  <p></p>
+  <input type="text" name="content" value="<%= @note['content'] %>">
+  <button type="submit">保存</button>
+</form>
