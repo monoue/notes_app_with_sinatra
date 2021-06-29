@@ -5,6 +5,13 @@ require 'json'
 require 'securerandom'
 require 'date'
 
+# set :environment, :production
+set :show_exceptions, :after_handler if :environment == :production
+
+error do
+  'エラーが発生しました。 - ' + env['sinatra.error'].message
+end
+
 def get_json_path
   './notes.json'
 end
@@ -30,7 +37,7 @@ get '/home' do
 end
 
 def make_new_note(params, id)
-  title = params[:title]
+  title = params[:title] == '' ? '（無題）' : params[:title]
   content = params[:content]
   time = Time.now.to_i
   {"id"=> id, "title"=> title, "content"=> content, "time"=> time}
@@ -46,7 +53,7 @@ end
 
 not_found do
   status 404
-  erb :not_found
+  erb :page_not_found
 end
 
 post '/new' do
@@ -58,6 +65,8 @@ get '/notes/:id' do |id|
   @note = get_target_note(id)
   @title = "メモ: #{@note['title']}"
   erb :note
+rescue NoMethodError
+  erb :page_not_found
 end
 
 get '/notes/:id/edit' do |id|

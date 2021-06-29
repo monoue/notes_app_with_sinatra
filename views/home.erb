@@ -1,7 +1,11 @@
 <header>
-  <h1>My Notes</h1>
+  <div class="flex">
+    <div class="home-header">
+      <h1>My Notes</h1>
+    </div>
+    <button onclick="location.href='/new'">追加</button>
+  </div>
 </header>
-<button onclick="location.href='/new'">追加</button>
 <ul>
   <% @notes.each do |note| %>
     <li><a href="/notes/<%= note['id'] %>">
