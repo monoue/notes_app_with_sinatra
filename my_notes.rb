@@ -109,12 +109,6 @@ patch '/notes/:id/edit' do |id|
   redirect to('/home')
 end
 
-# patch '/notes/:id' do |id|
-#   target_deleted_json_data = get_target_deleted_json_data(id)
-#   File.open(make_json_path, 'w') { |io| JSON.dump(target_deleted_json_data, io) }
-#   redirect to('/home')
-# end
-
 delete '/notes/:id' do |id|
   Delete.delete_note_from_json(id)
   redirect to('/home')
