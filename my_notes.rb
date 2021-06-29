@@ -19,8 +19,16 @@ not_found do
   erb :page_not_found
 end
 
+def make_app_name
+  'My Notes'
+end
+
 def make_json_path
   './notes.json'
+end
+
+def make_home_path
+  '/home'
 end
 
 def make_json_data
@@ -34,13 +42,6 @@ end
 def get_target_note(id)
   json_data = make_json_data
   get_target_note_from_notes(json_data['notes'], id)
-end
-
-get '/home' do
-  @title = 'ホーム / My Notes'
-  json_data = make_json_data
-  @notes = json_data['notes']
-  erb :home
 end
 
 module Add
@@ -84,14 +85,26 @@ module Delete
   end
 end
 
+get make_home_path do
+  @title = "ホーム / #{make_app_name}"
+  json_data = make_json_data
+  @notes = json_data['notes']
+  erb :home
+end
+
+get '/new' do
+  @title = "新規メモの追加 / #{make_app_name}"
+  erb :new
+end
+
 post '/new' do
   Add.add_note_to_json(params)
-  redirect to('/home')
+  redirect to(make_home_path)
 end
 
 get '/notes/:id' do |id|
   @note = get_target_note(id)
-  @title = "メモ: #{@note['title']}"
+  @title = "メモ: #{@note['title']} / #{make_app_name}"
   erb :note
 rescue NoMethodError
   erb :page_not_found
@@ -99,22 +112,17 @@ end
 
 get '/notes/:id/edit' do |id|
   @note = get_target_note(id)
-  @title = "変更: #{@note['title']}"
+  @title = "変更: #{@note['title']} / #{make_app_name}"
   erb :edit
+end
+
+delete '/notes/:id' do |id|
+  Delete.delete_note_from_json(id)
+  redirect to(make_home_path)
 end
 
 patch '/notes/:id/edit' do |id|
   Delete.delete_note_from_json(id)
   Add.add_note_to_json(params, id)
-  redirect to('/home')
-end
-
-delete '/notes/:id' do |id|
-  Delete.delete_note_from_json(id)
-  redirect to('/home')
-end
-
-get '/new' do
-  @title = '追加'
-  erb :new
+  redirect to(make_home_path)
 end
