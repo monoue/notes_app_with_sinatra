@@ -74,19 +74,6 @@ ul > li, .note-input {
     list-style-type: none;
 }
 
-.note-input {
-    padding: 20px;
-}
-
-.note-input {
-    border-radius: 4px;
-}
-
-.note-input-fixed {
-    background-color: #a5a0cf;
-    border-color: #a5a0cf;
-}
-
 li a {
     padding: 20px;
     color: #414141;
@@ -96,8 +83,22 @@ li a {
     width: 360px;
 }
 
+.note-input {
+    padding: 20px;
+    border-radius: 4px;
+}
+
+.note-input-fixed {
+    background-color: #a5a0cf;
+    border-color: #a5a0cf;
+}
+
 .note-element {
     margin-bottom: 30px;
+}
+
+.note-element-header > h2 {
+    font-size: 20px;
 }
 
 .note-element-header {

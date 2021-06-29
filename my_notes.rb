@@ -8,6 +8,12 @@ require 'json'
 require 'securerandom'
 require 'date'
 
+helpers do
+  def h(str)
+    Rack::Utils.escape_html(str)
+  end
+end
+
 set :show_exceptions, :after_handler if :environment == :production
 
 error do

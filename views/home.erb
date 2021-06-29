@@ -8,8 +8,8 @@
 </header>
 <ul>
   <% @notes.each do |note| %>
-    <li><a href="/notes/<%= note['id'] %>">
-      <%= Rack::Utils.escape_html(note['title']) %></a>
+    <li><a href="/notes/<%= h(note['id']) %>">
+      <%= h(note['title']) %></a>
     </li>
   <% end %>
 </ul>

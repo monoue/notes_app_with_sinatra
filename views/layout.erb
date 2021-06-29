@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<head>
-  <meta charset="utf-8">
-  <title><%= @title %></title>
-  <link rel="stylesheet" href="/css/styles.css">
-</head>
 <html lang="ja">
-<body>
-  <div class="container">
-    <%= yield %>
-  </div>
-</body>
+  <head>
+    <meta charset="utf-8">
+    <title><%= h(@title) %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+
+  <body>
+    <div class="container">
+      <%= yield %>
+    </div>
+  </body>
 </html>
 
