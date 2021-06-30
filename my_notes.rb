@@ -7,6 +7,9 @@ require 'erb'
 require 'json'
 require 'securerandom'
 require 'date'
+require 'pg'
+
+connection = PG.connect(dbname: 'notes')
 
 helpers do
   def h(str)
