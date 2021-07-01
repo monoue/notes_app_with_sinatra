@@ -21,10 +21,7 @@ def make_connection
   PG.connect(dbname: make_db_name)
 end
 
-before do
-  connection = PG.connect(dbname: make_db_name)
-  @notes = connection.exec("SELECT * FROM #{make_table_name}")
-end
+connection = make_connection
 
 helpers do
   def h(str)
@@ -51,22 +48,13 @@ def make_home_path
   '/home'
 end
 
-def get_target_note_from_notes(notes, note_id)
-  notes.find { |note| note['id'] == note_id }
-end
-
-def get_target_note(id)
-  # json_data = make_json_data
-  # get_target_note_from_notes(json_data['notes'], id)
-  # connection = PG.connect(dbname: 'my_notes')
-  # connection.exec("SELECT * FROM #{make_table_name} WHERE id = #{id}").first
-  @notes.find{|note| note['id'] == id}
+def get_target_note(connection, id)
+  connection.exec("SELECT * FROM #{make_table_name} WHERE id = #{id}").first
 end
 
 module Add
   class << self
-    def add_note_to_json(params, id = nil)
-      connection = make_connection
+    def add_note_to_json(connection, params, id = nil)
       sql = make_sql(params, id)
       connection.exec(sql)
     end
@@ -86,8 +74,7 @@ end
 
 module Delete
   class << self
-    def delete_note_from_json(id)
-      connection = make_connection
+    def delete_note_from_json(connection, id)
       connection.exec("DELETE FROM #{make_table_name} WHERE id = #{id}")
     end
   end
@@ -95,9 +82,7 @@ end
 
 get make_home_path do
   @title = "ホーム / #{make_app_name}"
-  # json_data = make_json_data
-  # @notes = json_data['notes']
-  # @notes = connection.exec("SELECT * FROM #{make_table_name}")
+  @notes = connection.exec("SELECT * FROM #{make_table_name}")
   erb :home
 end
 
@@ -107,12 +92,12 @@ get '/new' do
 end
 
 post '/new' do
-  Add.add_note_to_json(params)
+  Add.add_note_to_json(connection, params)
   redirect to(make_home_path)
 end
 
 get '/notes/:id' do |id|
-  @note = get_target_note(id)
+  @note = get_target_note(connection, id)
   @title = "メモ: #{@note['title']} / #{make_app_name}"
   erb :note
 rescue NoMethodError
@@ -120,18 +105,18 @@ rescue NoMethodError
 end
 
 get '/notes/:id/edit' do |id|
-  @note = get_target_note(id)
+  @note = get_target_note(connection, id)
   @title = "変更: #{@note['title']} / #{make_app_name}"
   erb :edit
 end
 
 delete '/notes/:id' do |id|
-  Delete.delete_note_from_json(id)
+  Delete.delete_note_from_json(connection, id)
   redirect to(make_home_path)
 end
 
 patch '/notes/:id/edit' do |id|
-  Delete.delete_note_from_json(id)
-  Add.add_note_to_json(params, id)
+  Delete.delete_note_from_json(connection, id)
+  Add.add_note_to_json(connection, params, id)
   redirect to(make_home_path)
 end
