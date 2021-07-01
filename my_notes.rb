@@ -4,9 +4,7 @@
 require 'sinatra'
 require 'sinatra/reloader'
 require 'erb'
-require 'json'
 require 'securerandom'
-require 'date'
 require 'pg'
 
 set :show_exceptions, :after_handler if :environment == :production
@@ -44,35 +42,8 @@ def make_home_path
 end
 
 def get_target_note(connection, id)
-  connection.exec("SELECT * FROM #{make_table_name} WHERE id = #{id}").first
-end
-
-module Add
-  class << self
-    def add_note_to_json(connection, params, id = nil)
-      sql = make_sql(params, id)
-      connection.exec(sql)
-    end
-
-    private
-
-    def make_sql(params, id)
-      title = params[:title] == '' ? '（無題）' : params[:title]
-      if id.nil?
-        "INSERT INTO #{make_table_name} (title, content) VALUES ('#{title}', '#{params[:content]}')"
-      else
-        "INSERT INTO #{make_table_name} (id, title, content) VALUES ('#{id}', '#{title}', '#{params[:content]}')"
-      end
-    end
-  end
-end
-
-module Delete
-  class << self
-    def delete_note_from_json(connection, id)
-      connection.exec("DELETE FROM #{make_table_name} WHERE id = #{id}")
-    end
-  end
+  sql = "SELECT * FROM #{make_table_name} WHERE id = $1"
+  connection.exec(sql, [id]).first
 end
 
 error do
@@ -97,8 +68,13 @@ get '/new' do
   erb :new
 end
 
+def add_note(connection, params)
+  title = params[:title] == '' ? '（無題）' : params[:title]
+  connection.exec("INSERT INTO #{make_table_name} (title, content) VALUES ($1, $2)", [title, params[:content]])
+end
+
 post '/new' do
-  Add.add_note_to_json(connection, params)
+  add_note(connection, params)
   redirect to(make_home_path)
 end
 
@@ -116,14 +92,20 @@ get '/notes/:id/edit' do |id|
   erb :edit
 end
 
+def delete_note(connection, id)
+  connection.exec("DELETE FROM #{make_table_name} WHERE id = $1", [id])
+end
+
 delete '/notes/:id' do |id|
-  Delete.delete_note_from_json(connection, id)
+  delete_note(connection, id)
   redirect to(make_home_path)
+end
+
+def update_target_note(connection, params, id)
+  connection.exec("UPDATE #{make_table_name} SET title = $1, content = $2 WHERE id = $3", [params[:title], params[:content], id])
 end
 
 patch '/notes/:id/edit' do |id|
-  Delete.delete_note_from_json(connection, id)
-  Add.add_note_to_json(connection, params, id)
+  update_target_note(connection, params, id)
   redirect to(make_home_path)
 end
-
