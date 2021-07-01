@@ -9,7 +9,22 @@ require 'securerandom'
 require 'date'
 require 'pg'
 
-connection = PG.connect(dbname: 'notes')
+def make_db_name
+  'my_notes'
+end
+
+def make_table_name
+  'notes'
+end
+
+def make_connection
+  PG.connect(dbname: make_db_name)
+end
+
+before do
+  connection = PG.connect(dbname: make_db_name)
+  @notes = connection.exec("SELECT * FROM #{make_table_name}")
+end
 
 helpers do
   def h(str)
@@ -32,16 +47,8 @@ def make_app_name
   'My Notes'
 end
 
-def make_json_path
-  './notes.json'
-end
-
 def make_home_path
   '/home'
-end
-
-def make_json_data
-  JSON.parse(File.open(make_json_path).read)
 end
 
 def get_target_note_from_notes(notes, note_id)
@@ -49,27 +56,30 @@ def get_target_note_from_notes(notes, note_id)
 end
 
 def get_target_note(id)
-  json_data = make_json_data
-  get_target_note_from_notes(json_data['notes'], id)
+  # json_data = make_json_data
+  # get_target_note_from_notes(json_data['notes'], id)
+  # connection = PG.connect(dbname: 'my_notes')
+  # connection.exec("SELECT * FROM #{make_table_name} WHERE id = #{id}").first
+  @notes.find{|note| note['id'] == id}
 end
 
 module Add
   class << self
-    def add_note_to_json(params, id = SecureRandom.uuid)
-      json_data = make_json_data
-      new_note = make_new_note(params, id)
-      json_data['notes'] << new_note
-      json_data['notes'].sort_by! { |note| note['time'] }.reverse!
-      File.open(make_json_path, 'w') { |io| JSON.dump(json_data, io) }
+    def add_note_to_json(params, id = nil)
+      connection = make_connection
+      sql = make_sql(params, id)
+      connection.exec(sql)
     end
 
     private
 
-    def make_new_note(params, id)
+    def make_sql(params, id)
       title = params[:title] == '' ? '（無題）' : params[:title]
-      content = params[:content]
-      time = Time.now.to_i
-      { 'id' => id, 'title' => title, 'content' => content, 'time' => time }
+      if id.nil?
+        "INSERT INTO #{make_table_name} (title, content) VALUES ('#{title}', '#{params[:content]}')"
+      else
+        "INSERT INTO #{make_table_name} (id, title, content) VALUES ('#{id}', '#{title}', '#{params[:content]}')"
+      end
     end
   end
 end
@@ -77,27 +87,17 @@ end
 module Delete
   class << self
     def delete_note_from_json(id)
-      json_data = make_json_data
-      target_note = get_target_note_from_notes(json_data['notes'], id)
-      json_data['notes'].delete(target_note)
-      File.open(make_json_path, 'w') { |io| JSON.dump(json_data, io) }
-    end
-
-    private
-
-    def get_target_deleted_json_data(id)
-      json_data = make_json_data
-      target_note = get_target_note_from_notes(json_data['notes'], id)
-      json_data['notes'].delete(target_note)
-      json_data
+      connection = make_connection
+      connection.exec("DELETE FROM #{make_table_name} WHERE id = #{id}")
     end
   end
 end
 
 get make_home_path do
   @title = "ホーム / #{make_app_name}"
-  json_data = make_json_data
-  @notes = json_data['notes']
+  # json_data = make_json_data
+  # @notes = json_data['notes']
+  # @notes = connection.exec("SELECT * FROM #{make_table_name}")
   erb :home
 end
 
