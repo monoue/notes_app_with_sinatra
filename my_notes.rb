@@ -9,19 +9,7 @@ require 'securerandom'
 require 'date'
 require 'pg'
 
-def make_db_name
-  'my_notes'
-end
-
-def make_table_name
-  'notes'
-end
-
-def make_connection
-  PG.connect(dbname: make_db_name)
-end
-
-connection = make_connection
+set :show_exceptions, :after_handler if :environment == :production
 
 helpers do
   def h(str)
@@ -29,15 +17,22 @@ helpers do
   end
 end
 
-set :show_exceptions, :after_handler if :environment == :production
+module Connect
+  class << self
+    def make_connection
+      PG.connect(dbname: make_db_name)
+    end
 
-error do
-  "エラーが発生しました。 - #{env['sinatra.error'].message}"
+    private
+
+    def make_db_name
+      'my_notes'
+    end
+  end
 end
 
-not_found do
-  status 404
-  erb :page_not_found
+def make_table_name
+  'notes'
 end
 
 def make_app_name
@@ -80,9 +75,20 @@ module Delete
   end
 end
 
+error do
+  "エラーが発生しました。 - #{env['sinatra.error'].message}"
+end
+
+not_found do
+  status 404
+  erb :page_not_found
+end
+
+connection = Connect.make_connection
+
 get make_home_path do
   @title = "ホーム / #{make_app_name}"
-  @notes = connection.exec("SELECT * FROM #{make_table_name}")
+  @notes = connection.exec("SELECT * FROM #{make_table_name} ORDER BY timestamp DESC")
   erb :home
 end
 
@@ -120,3 +126,4 @@ patch '/notes/:id/edit' do |id|
   Add.add_note_to_json(connection, params, id)
   redirect to(make_home_path)
 end
+
