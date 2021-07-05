@@ -25,20 +25,20 @@ not_found do
   erb :page_not_found
 end
 
-def make_app_name
+def app_name
   'My Notes'
 end
 
-def make_json_path
+def json_path
   './notes.json'
 end
 
-def make_home_path
+def home_path
   '/home'
 end
 
 def make_json_data
-  JSON.parse(File.open(make_json_path).read)
+  JSON.parse(File.open(json_path).read)
 end
 
 def get_target_note_from_notes(notes, note_id)
@@ -50,14 +50,43 @@ def get_target_note(id)
   get_target_note_from_notes(json_data['notes'], id)
 end
 
-module Add
+module Validate
+  class << self
+    def note_invalid(note)
+      return true if note.nil?
+
+      [note['id'], note['title'], note['time']].include?(nil)
+    end
+
+    def target_note_invalid(id)
+      target_note = get_target_note(id)
+      note_invalid(target_note)
+    end
+
+    def notes_invalid(notes)
+      notes.each { |note| return true if note_invalid(note) }
+      false
+    end
+  end
+end
+
+module Note
   class << self
     def add_note_to_json(params, id = SecureRandom.uuid)
       json_data = make_json_data
       new_note = make_new_note(params, id)
       json_data['notes'] << new_note
       json_data['notes'].sort_by! { |note| note['time'] }.reverse!
-      File.open(make_json_path, 'w') { |io| JSON.dump(json_data, io) }
+      File.open(json_path, 'w') { |io| JSON.dump(json_data, io) }
+    end
+
+    def delete_note_from_json(id)
+      json_data = make_json_data
+      target_note = get_target_note_from_notes(json_data['notes'], id)
+      return if Validate.note_invalid(target_note)
+
+      json_data['notes'].delete(target_note)
+      File.open(json_path, 'w') { |io| JSON.dump(json_data, io) }
     end
 
     private
@@ -71,64 +100,62 @@ module Add
   end
 end
 
-module Delete
-  class << self
-    def delete_note_from_json(id)
-      json_data = make_json_data
-      target_note = get_target_note_from_notes(json_data['notes'], id)
-      json_data['notes'].delete(target_note)
-      File.open(make_json_path, 'w') { |io| JSON.dump(json_data, io) }
-    end
-
-    private
-
-    def get_target_deleted_json_data(id)
-      json_data = make_json_data
-      target_note = get_target_note_from_notes(json_data['notes'], id)
-      json_data['notes'].delete(target_note)
-      json_data
-    end
+get home_path do
+  @title = "ホーム / #{app_name}"
+  json_data = make_json_data
+  @notes = json_data['notes']
+  if Validate.notes_invalid(@notes)
+    erb :page_not_found
+  else
+    erb :home
   end
 end
 
-get make_home_path do
-  @title = "ホーム / #{make_app_name}"
-  json_data = make_json_data
-  @notes = json_data['notes']
-  erb :home
-end
-
 get '/new' do
-  @title = "新規メモの追加 / #{make_app_name}"
+  @title = "新規メモの追加 / #{app_name}"
   erb :new
 end
 
 post '/new' do
-  Add.add_note_to_json(params)
-  redirect to(make_home_path)
+  Note.add_note_to_json(params)
+  redirect to(home_path)
 end
 
 get '/notes/:id' do |id|
   @note = get_target_note(id)
-  @title = "メモ: #{@note['title']} / #{make_app_name}"
-  erb :note
-rescue NoMethodError
-  erb :page_not_found
+  if Validate.note_invalid(@note)
+    erb :page_not_found
+  else
+    @title = "メモ: #{@note['title']} / #{app_name}"
+    erb :note
+  end
 end
 
 get '/notes/:id/edit' do |id|
   @note = get_target_note(id)
-  @title = "変更: #{@note['title']} / #{make_app_name}"
-  erb :edit
+  if Validate.note_invalid(@note)
+    erb :page_not_found
+  else
+    @title = "変更: #{@note['title']} / #{app_name}"
+    erb :edit
+  end
 end
 
 delete '/notes/:id' do |id|
-  Delete.delete_note_from_json(id)
-  redirect to(make_home_path)
+  if Validate.target_note_invalid(id)
+    erb :page_not_found
+  else
+    Note.delete_note_from_json(id)
+    redirect to(home_path)
+  end
 end
 
 patch '/notes/:id/edit' do |id|
-  Delete.delete_note_from_json(id)
-  Add.add_note_to_json(params, id)
-  redirect to(make_home_path)
+  if Validate.target_note_invalid(id)
+    erb :page_not_found
+  else
+    Note.delete_note_from_json(id)
+    Note.add_note_to_json(params, id)
+    redirect to(home_path)
+  end
 end
