@@ -4,7 +4,7 @@
   </div>
 </header>
 
-<form action="/notes/<%= h(@note['id']) %>/edit" method="post">
+<form action="/notes/<%= h(@note['id']) %>" method="post">
   <input type="hidden" name="_method" value="PATCH">
   <div class="note-element">
     <div class="note-element-header">
@@ -25,5 +25,5 @@
       <input type="text" name="content" value="<%= h(@note['content']) %>">
     </div>
   </div>
-  <button class="center "type="submit">保存</button>
+  <input class="button center" type="submit" value="保存">
 </form>

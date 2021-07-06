@@ -111,12 +111,12 @@ get home_path do
   end
 end
 
-get '/new' do
+get '/notes/new' do
   @title = "新規メモの追加 / #{app_name}"
   erb :new
 end
 
-post '/new' do
+post '/notes/new' do
   Note.add_note_to_json(params)
   redirect to(home_path)
 end
@@ -150,7 +150,7 @@ delete '/notes/:id' do |id|
   end
 end
 
-patch '/notes/:id/edit' do |id|
+patch '/notes/:id' do |id|
   if Validate.target_note_invalid(id)
     erb :page_not_found
   else
