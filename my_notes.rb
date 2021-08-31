@@ -37,6 +37,10 @@ def home_path
   '/home'
 end
 
+def make_page_title(description)
+  "#{description} / #{app_name}"
+end
+
 def make_json_data
   JSON.parse(File.open(json_path).read)
 end
@@ -52,20 +56,19 @@ end
 
 module Validate
   class << self
-    def note_invalid(note)
+    def note_invalid?(note)
       return true if note.nil?
 
       [note['id'], note['title'], note['time']].include?(nil)
     end
 
-    def target_note_invalid(id)
+    def target_note_invalid?(id)
       target_note = get_target_note(id)
-      note_invalid(target_note)
+      note_invalid?(target_note)
     end
 
-    def notes_invalid(notes)
-      notes.each { |note| return true if note_invalid(note) }
-      false
+    def notes_invalid?(notes)
+      notes.any? { |note| note_invalid?(note) }
     end
   end
 end
@@ -83,7 +86,7 @@ module Note
     def delete_note_from_json(id)
       json_data = make_json_data
       target_note = get_target_note_from_notes(json_data['notes'], id)
-      return if Validate.note_invalid(target_note)
+      return if Validate.note_invalid?(target_note)
 
       json_data['notes'].delete(target_note)
       File.open(json_path, 'w') { |io| JSON.dump(json_data, io) }
@@ -101,10 +104,10 @@ module Note
 end
 
 get home_path do
-  @title = "ホーム / #{app_name}"
+  @title = make_page_title('ホーム')
   json_data = make_json_data
   @notes = json_data['notes']
-  if Validate.notes_invalid(@notes)
+  if Validate.notes_invalid?(@notes)
     erb :page_not_found
   else
     erb :home
@@ -112,37 +115,37 @@ get home_path do
 end
 
 get '/notes/new' do
-  @title = "新規メモの追加 / #{app_name}"
+  @title = make_page_title('新規メモの追加')
   erb :new
 end
 
-post '/notes/new' do
+post '/notes' do
   Note.add_note_to_json(params)
   redirect to(home_path)
 end
 
 get '/notes/:id' do |id|
   @note = get_target_note(id)
-  if Validate.note_invalid(@note)
+  if Validate.note_invalid?(@note)
     erb :page_not_found
   else
-    @title = "メモ: #{@note['title']} / #{app_name}"
+    @title = make_page_title("メモ: #{@note['title']}")
     erb :note
   end
 end
 
 get '/notes/:id/edit' do |id|
   @note = get_target_note(id)
-  if Validate.note_invalid(@note)
+  if Validate.note_invalid?(@note)
     erb :page_not_found
   else
-    @title = "変更: #{@note['title']} / #{app_name}"
+    @title = make_page_title("変更: #{@note['title']}")
     erb :edit
   end
 end
 
 delete '/notes/:id' do |id|
-  if Validate.target_note_invalid(id)
+  if Validate.target_note_invalid?(id)
     erb :page_not_found
   else
     Note.delete_note_from_json(id)
@@ -151,7 +154,7 @@ delete '/notes/:id' do |id|
 end
 
 patch '/notes/:id' do |id|
-  if Validate.target_note_invalid(id)
+  if Validate.target_note_invalid?(id)
     erb :page_not_found
   else
     Note.delete_note_from_json(id)
