@@ -1,0 +1,28 @@
+<header>
+  <div class="page-header">
+    <h1>新しいメモ</h1>
+  </div>
+</header>
+
+<form action="/notes" method="post">
+  <div class="note-element">
+    <div class="note-element-header">
+      <h2>名前</h2>
+    </div>
+
+    <div class="note-input">
+      <input type="text" name="title">
+    </div>
+  </div>
+
+  <div class="note-element">
+    <div class="note-element-header">
+      <h2>内容</h2>
+    </div>
+
+    <div class="note-input">
+      <input type="text" name="content">
+    </div>
+  </div>
+  <input class="button center" type="submit" value="保存">
+</form>

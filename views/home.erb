@@ -1,0 +1,15 @@
+<header>
+  <div class="flex">
+    <div class="home-header">
+      <h1>My Notes</h1>
+    </div>
+    <a class="button" href="/notes/new">追加</a>
+  </div>
+</header>
+<ul>
+  <% @notes.each do |note| %>
+    <li><a href="/notes/<%= h(note['id']) %>">
+      <%= h(note['title']) %></a>
+    </li>
+  <% end %>
+</ul>

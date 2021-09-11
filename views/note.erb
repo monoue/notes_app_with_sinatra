@@ -1,0 +1,33 @@
+<header>
+  <div class="page-header">
+    <h1>メモ内容の確認</h1>
+  </div>
+</header>
+
+<div class="note-element">
+  <div class="note-element-header">
+    <h2>名前</h2>
+  </div>
+
+  <div class="note-input note-input-fixed">
+    <%= h(@note['title']) %>
+  </div>
+</div>
+
+<div class="note-element">
+  <div class="note-element-header">
+    <h2>内容</h2>
+  </div>
+
+  <div class="note-input note-input-fixed">
+    <%= h(@note['content']) %>
+  </div>
+</div>
+
+<div class="buttons">
+  <a class="button" href="/notes/<%= h(@note['id']) %>/edit">変更</a>
+  <form action="/notes/<%= h(@note['id']) %>" method="post">
+      <input type="hidden" name="_method" value="DELETE">
+      <input class="delete" type="submit" value="削除">
+  </form>
+</div>
