@@ -17,19 +17,27 @@ My Notes は Sinatra で作成されています。
 もし、`ruby: command not found`と表示される場合、PC に Ruby をインストールしてください。
  
 
-2. お好みの方法で、`Sinatra`と`WEBrick`という Gem をインストールしてください（※Ruby のバージョンが 2.7 系以前の場合、`WEBrick`は不要）。
-よく分からない場合は、以下のコマンドをコピー＆ペーストし、実行してください。
+2. お好みの方法で、以下の gem をインストールしてください。
+    - sinatra
+    - sinatra-contrib
+    - securerandom
+    - pg
+
+    インストールの方法をご存じでない場合は、ターミナルにて、以下のコマンドを実行してください。
 ```bash
-gem install sinatra webrick
+gem install sinatra sinatra-contrib securerandom pg
 ```
 
+3. お好みの方法で、`PostgreSQL`をインストールしてください。
    
-3. ターミナルにて、以下のコマンドを実行してください。
+4. ターミナルにて、以下のコマンドを実行してください。
 ```
-git clone https://github.com/monoue/notes_app_with_sinatra.git my_notes && ./my_notes/my_notes.rb -o 0.0.0.0 
+git clone https://github.com/monoue/notes_app_with_sinatra.git my_notes && cd my_notes && createdb my_notes
 ```
 
-4. ブラウザにて、http://localhost:4567/home を開いてください。
+5. `psql my_notes`コマンドで対話的ターミナルを立ち上げ、その状態で`\i create_table.sql`と入力し、その後`\q`で対話的ターミナルを閉じてください。
+
+6. `./my_notes.rb -o 0.0.0.0`を実行した後、ブラウザにて、http://localhost:4567/home を開いてください。
 
 # 使用方法
 ## 新規メモの追加
