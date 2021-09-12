@@ -4,7 +4,7 @@
   </div>
 </header>
 
-<form action="/notes/<%= h(@note['id']) %>" method="post">
+<form action="/notes/<%= h(@note['id']) %>/edit" method="post">
   <input type="hidden" name="_method" value="PATCH">
   <div class="note-element">
     <div class="note-element-header">

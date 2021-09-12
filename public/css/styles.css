@@ -41,7 +41,6 @@ header h1 {
     margin: 0 auto;
 }
 
-/*button, .delete {*/
 .button, .delete {
     text-align: center;
     cursor: pointer;
