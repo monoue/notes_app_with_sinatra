@@ -41,7 +41,9 @@ header h1 {
     margin: 0 auto;
 }
 
-button, .delete {
+/*button, .delete {*/
+.button, .delete {
+    text-align: center;
     cursor: pointer;
     text-decoration: none;
     border-width: 0;
@@ -55,7 +57,7 @@ button, .delete {
     border-radius: 4px;
 }
 
-button:hover, input:hover, ul > li:hover {
+.button:hover, input:hover, ul > li:hover {
     opacity: 0.9;
 }
 
