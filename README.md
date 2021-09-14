@@ -21,10 +21,10 @@ My Notes は Sinatra で作成されています。
    
 3. ターミナルにて、以下のコマンドを実行してください。
 ```
-git clone https://github.com/monoue/notes_app_with_sinatra.git my_notes && cd my_notes && bundle && createdb my_notes
+git clone https://github.com/unstoppa61e/notes_app_with_sinatra.git my_notes && cd my_notes && bundle && createdb my_notes
 ```
 
-4. `psql my_notes`コマンドで対話的ターミナルを立ち上げ、その状態で`\i create_table.sql`と入力し、その後`\q`で対話的ターミナルを閉じてください。
+4. `psql my_notes`コマンドで対話的ターミナルを立ち上げ、その状態で`\i init_table.sql`と入力し、その後`\q`で対話的ターミナルを閉じてください。
 
 5. `./my_notes.rb -o 0.0.0.0`を実行した後、ブラウザにて、http://localhost:4567/home を開いてください。
 
