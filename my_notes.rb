@@ -36,9 +36,9 @@ def home_path
   '/home'
 end
 
-module Connect
+module DB
   class << self
-    def make_connection
+    def create_connection
       PG.connect(dbname: db_name)
     end
 
@@ -50,16 +50,11 @@ module Connect
   end
 end
 
-def make_page_title(description)
+def page_title(description)
   "#{description} / #{app_name}"
 end
 
-def get_target_note(connection, id)
-  sql = "SELECT * FROM #{table_name} WHERE id = $1"
-  connection.exec(sql, [id]).first
-end
-
-connection = Connect.make_connection
+connection = DB.create_connection
 
 module Validate
   class << self
@@ -70,7 +65,7 @@ module Validate
     end
 
     def target_note_invalid?(id)
-      target_note = get_target_note(Connect.make_connection, id)
+      target_note = Note.get_target(DB.create_connection, id)
       note_invalid?(target_note)
     end
 
@@ -82,7 +77,12 @@ end
 
 module Note
   class << self
-    def add_note(connection, params)
+    def get_target(connection, id)
+      sql = "SELECT * FROM #{table_name} WHERE id = $1"
+      connection.exec(sql, [id]).first
+    end
+
+    def add(connection, params)
       title = params[:title] == '' ? '（無題）' : params[:title]
       connection.exec(
         "INSERT INTO #{table_name} (title, content) VALUES ($1, $2)",
@@ -90,11 +90,11 @@ module Note
       )
     end
 
-    def delete_note(connection, id)
+    def delete(connection, id)
       connection.exec("DELETE FROM #{table_name} WHERE id = $1", [id])
     end
 
-    def update_note(connection, params, id)
+    def update(connection, params, id)
       connection.exec(
         "UPDATE #{table_name} SET title = $1, content = $2 WHERE id = $3",
         [params[:title], params[:content], id]
@@ -104,7 +104,7 @@ module Note
 end
 
 get home_path do
-  @title = make_page_title('ホーム')
+  @title = page_title('ホーム')
   @notes = connection.exec("SELECT * FROM #{table_name} ORDER BY timestamp DESC")
   if Validate.notes_invalid?(@notes)
     erb :page_not_found
@@ -114,31 +114,31 @@ get home_path do
 end
 
 get '/notes/new' do
-  @title = make_page_title('新規メモの追加')
+  @title = page_title('新規メモの追加')
   erb :new
 end
 
 post '/notes' do
-  Note.add_note(connection, params)
+  Note.add(connection, params)
   redirect to(home_path)
 end
 
 get '/notes/:id' do |id|
-  @note = get_target_note(connection, id)
+  @note = Note.get_target(connection, id)
   if Validate.note_invalid?(@note)
     erb :page_not_found
   else
-    @title = make_page_title("メモ: #{@note['title']}")
+    @title = page_title("メモ: #{@note['title']}")
     erb :note
   end
 end
 
 get '/notes/:id/edit' do |id|
-  @note = get_target_note(connection, id)
+  @note = Note.get_target(connection, id)
   if Validate.note_invalid?(@note)
     erb :page_not_found
   else
-    @title = make_page_title("変更: #{@note['title']}")
+    @title = page_title("変更: #{@note['title']}")
     erb :edit
   end
 end
@@ -147,7 +147,7 @@ delete '/notes/:id' do |id|
   if Validate.target_note_invalid?(id)
     erb :page_not_found
   else
-    Note.delete_note(connection, id)
+    Note.delete(connection, id)
     redirect to(home_path)
   end
 end
@@ -156,7 +156,7 @@ patch '/notes/:id/edit' do |id|
   if Validate.target_note_invalid?(id)
     erb :page_not_found
   else
-    Note.update_note(connection, params, id)
+    Note.update(connection, params, id)
     redirect to(home_path)
   end
 end
