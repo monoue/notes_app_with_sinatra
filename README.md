@@ -14,7 +14,8 @@ My Notes は Sinatra で作成されています。
 
 # インストール & 起動
 1. ターミナルにて、`ruby -v`を実行し、バージョンを確認してください。
-もし、`ruby: command not found`と表示される場合、PC に Ruby をインストールしてください。
+    - `ruby: command not found`と表示される場合、PC に Ruby をインストールしてください。
+    - バージョンが 2.6 未満の場合は、バージョンアップをなさる（推奨）か、`gem install bundler`を実行してください。
  
 
 2. お好みの方法で、`PostgreSQL`をインストールしてください。
