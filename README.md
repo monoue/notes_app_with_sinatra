@@ -20,9 +20,12 @@ My Notes は Sinatra で作成されています。
 
 2. お好みの方法で、`PostgreSQL`をインストールしてください。
    
-3. ターミナルにて、以下のコマンドを実行してください。
+3. ターミナルにて、以下のコマンドを順に実行してください。
 ```
-git clone https://github.com/unstoppa61e/notes_app_with_sinatra.git my_notes && cd my_notes && bundle && createdb my_notes
+git clone https://github.com/unstoppa61e/notes_app_with_sinatra.git my_notes
+cd my_notes
+bundle
+createdb my_notes
 ```
 
 4. `psql my_notes`コマンドで対話的ターミナルを立ち上げ、その状態で`\i init_table.sql`と入力し、その後`\q`で対話的ターミナルを閉じてください。

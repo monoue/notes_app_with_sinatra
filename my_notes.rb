@@ -65,7 +65,7 @@ module Validate
     end
 
     def target_note_invalid?(id)
-      target_note = Note.get_target(DB.create_connection, id)
+      target_note = Note.get(DB.create_connection, id)
       note_invalid?(target_note)
     end
 
@@ -77,7 +77,7 @@ end
 
 module Note
   class << self
-    def get_target(connection, id)
+    def get(connection, id)
       sql = "SELECT * FROM #{table_name} WHERE id = $1"
       connection.exec(sql, [id]).first
     end
@@ -124,7 +124,7 @@ post '/notes' do
 end
 
 get '/notes/:id' do |id|
-  @note = Note.get_target(connection, id)
+  @note = Note.get(connection, id)
   if Validate.note_invalid?(@note)
     erb :page_not_found
   else
@@ -134,7 +134,7 @@ get '/notes/:id' do |id|
 end
 
 get '/notes/:id/edit' do |id|
-  @note = Note.get_target(connection, id)
+  @note = Note.get(connection, id)
   if Validate.note_invalid?(@note)
     erb :page_not_found
   else
