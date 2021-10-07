@@ -55,5 +55,5 @@ git clone https://github.com/monoue/notes_app_with_sinatra.git my_notes && ./my_
 
 # 作者
 
-* monoue
-* ブログ: https://monoue.hatenablog.com/
+* unstoppa61e
+* ブログ: https://.hatenablog.com/
